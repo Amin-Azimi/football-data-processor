@@ -2,7 +2,7 @@
   "name": "football-data-processor",
   "version": "0.1.0",
   "bin": {
-    "football-data-processor": "bin/football-data-processor.js"
+    "football-data-processor": "cdk/bin/football-data-processor.js"
   },
   "scripts": {
     "build": "tsc",

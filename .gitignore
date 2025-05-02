@@ -5,6 +5,7 @@ node_modules
 npm-debug.log*
 .env
 .dynamodb/
+.idea/
 # Optional npm cache directory
 .npm
 

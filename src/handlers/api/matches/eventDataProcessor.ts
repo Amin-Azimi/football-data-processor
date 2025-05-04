@@ -4,15 +4,19 @@ import {
     PublishedMatchEventSchema
 } from "../../../models/request.model";
 import {ValidateSchema} from "../../../helpers/validateSchema";
+import {enrichAndProcessPublishedMatchEvent} from "../../../services/matches/matchEventDataService";
 
 export const handler = async(event: EventBridgeEvent<'MatchEvent', PublishedMatchEvent>): Promise<void> => {
-    console.log(`Match Event data received by data processor : ${JSON.stringify(event?.detail)}`);
-    const { detail } = event;
-    const PublishedMatchEvent = await ValidateSchema(PublishedMatchEventSchema, JSON.stringify(detail));
+    console.log(`Match Event data received by data processor : ${JSON.stringify(event)}`);
 
-    if (!PublishedMatchEvent.success) {
-        console.error('Validation failed:', PublishedMatchEvent.error);
-        return;
+    const { detail } = event;
+    const maybePublishedMatchEvent = await ValidateSchema<PublishedMatchEvent>(PublishedMatchEventSchema, JSON.stringify(detail));
+    if(!maybePublishedMatchEvent.success){
+        console.error('Validation failed on processing data:', maybePublishedMatchEvent.error);
+        return ;
     }
-    console.log(`Match Event data validated successfully : ${JSON.stringify(PublishedMatchEvent.data)}`);
+
+    await enrichAndProcessPublishedMatchEvent(maybePublishedMatchEvent.data);
+
+    console.log(`Match Event data processed and enriched successfully : ${JSON.stringify(maybePublishedMatchEvent.data)}`);
 }

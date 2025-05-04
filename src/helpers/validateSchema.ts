@@ -1,8 +1,7 @@
 import {ZodType} from "zod";
-import {MatchEvent} from "../models/request.model";
 
-export const ValidateSchema =  async<T extends ZodType>(zodSchema: T, data: string | null): Promise<{
-    success: true; data: MatchEvent} | {success: false; error: string
+export const ValidateSchema =  async<TData,T extends ZodType = ZodType >(zodSchema: T, data: string | null): Promise<{
+    success: true; data: TData} | {success: false; error: string
 }> => {
     try {
         const parsedBody = JSON.parse(data??'');

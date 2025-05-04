@@ -6,6 +6,7 @@ import {FootballAnalyticsApi} from "./constructs/api-gateway";
 import {FootballEventIngester} from "./constructs/lambdas/lambda-ingester";
 import {MatchEventsTable} from "./constructs/dynamon-db";
 import {FootballEventProcessor} from "./constructs/lambdas/lambda-data-processor";
+import {FootballEventQuery} from "./constructs/lambdas/lambda-query";
 
 export class FootballDataProcessorStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -37,9 +38,16 @@ export class FootballDataProcessorStack extends cdk.Stack {
         matchEventsTable.table.grantWriteData(footballEventProcessorLambda.lambdaFunction);
         eventBus.addProcessingLambda(footballEventProcessorLambda);
 
+        // Lambda: Query
+        const footballEventQueryLambda = new FootballEventQuery(this, 'FootballEventQuery', {
+            tableName: matchEventsTable.table.tableName
+        });
+        matchEventsTable.table.grantReadData(footballEventQueryLambda.lambdaFunction);
+
         // Create API Gateway
         const api = new FootballAnalyticsApi(this, 'FootballAnalyticsApi', {
-            dataIngestionLambda: footballEventIngesterLambda.lambdaFunction
+            dataIngestionLambda: footballEventIngesterLambda.lambdaFunction,
+            queryApiLambda: footballEventQueryLambda.lambdaFunction
         });
 
         new cdk.CfnOutput(this, 'ApiEndpoint', {

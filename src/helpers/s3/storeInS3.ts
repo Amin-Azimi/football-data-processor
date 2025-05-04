@@ -2,7 +2,7 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 const RAW_EVENTS_BUCKET = process.env.BUCKET_NAME!;
 
-export const storeObject = async ( key: string, body: object): Promise<void> => {
+export const storeInS3 = async ( body: object,key: string): Promise<void> => {
     console.log(`Storing object in S3 bucket ${RAW_EVENTS_BUCKET} with key ${key}`);
     if (!RAW_EVENTS_BUCKET) {
         console.error('S3 bucket name is not defined in environment variables');

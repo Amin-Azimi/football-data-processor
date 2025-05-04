@@ -1,29 +1,33 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import { randomUUID} from 'crypto';
+import {ValidateSchema} from "../../../helpers/validateSchema";
+import {MatchEventSchema} from "../../../models/request.model";
+import {saveMatchEvent} from "../../../services/matches/matchEventDataService";
 
 
 export const handler = async(event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
 
-    // TODO : validate event data
+    console.log(`Match Event data received by ingester`);
     try{
-        if(!event.body){
+        const maybeMatchEventData = await ValidateSchema(MatchEventSchema, event.body);
+        if(!maybeMatchEventData.success){
+            console.error('Validation failed:', maybeMatchEventData.error);
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: 'Missing event data' }),            }
+                body: JSON.stringify({
+                    message: "Validation failed",
+                    errors: maybeMatchEventData.error
+                }),
+            }
         }
-        console.log(`Event data received: ${event.body}`);
-        const eventData = JSON.parse(event.body);
-        const eventId = randomUUID();
-
-        console.log(`Event ID: ${eventId}`);
+        const eventId = await saveMatchEvent(maybeMatchEventData.data);
 
         // TODO : create a response type
         return{
             statusCode: 200,
             body: JSON.stringify({
-                message: 'Event received successfully',
+                message: 'Event processed successfully',
                 eventId: eventId,
-                eventData: eventData
+                eventData: maybeMatchEventData.data
             }),
         }
     }

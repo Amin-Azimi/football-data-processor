@@ -1,46 +1,49 @@
 import * as cdk from 'aws-cdk-lib';
-import * as nodejs from 'aws-cdk-lib/aws-lambda-nodejs';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as apiGateway from 'aws-cdk-lib/aws-apigateway';
-import * as s3 from 'aws-cdk-lib/aws-s3';
-
-import * as path from 'path';
 import { Construct } from 'constructs';
+import {RawEventBucket} from "./constructs/s3-bucket";
+import {MatchEventBus} from "./constructs/event-bus";
+import {FootballAnalyticsApi} from "./constructs/api-gateway";
+import {FootballEventIngester} from "./constructs/lambdas/lambda-ingester";
+import {MatchEventsTable} from "./constructs/dynamon-db";
+import {FootballEventProcessor} from "./constructs/lambdas/lambda-data-processor";
 
 export class FootballDataProcessorStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        const rawEventBucket = new s3.Bucket(this, 'RawEventBucket', {
-            bucketName: 'football-analytics-raw-events',
-            removalPolicy: cdk.RemovalPolicy.DESTROY,
-            autoDeleteObjects: true,
+        // Create S3 Bucket
+        const rawEventBucket = new RawEventBucket(this, 'RawEventBucket');
+
+        // Create EventBridge Bus
+        const eventBus = new MatchEventBus(this, 'MatchEventsBus');
+
+        // Create database resources
+        const matchEventsTable = new MatchEventsTable(this, 'MatchEventsTable');
+
+        // Lambda: Ingestion
+        const footballEventIngesterLambda = new FootballEventIngester(this, 'FootballEventIngester', {
+            bucketName: rawEventBucket.bucket.bucketName,
+            eventBusName: eventBus.eventBus.eventBusName
         });
 
-        const footballEventIngesterLambda = new nodejs.NodejsFunction(this, 'FootballEventIngesterLambda', {
-            runtime: lambda.Runtime.NODEJS_22_X,
-            entry: path.join(__dirname, '../../src/handlers/api/matches/eventDataIngester.ts'),
-            handler: 'handler',
-            environment: {
-                BUCKET_NAME: rawEventBucket.bucketName,
-            },
-            bundling: {
-                externalModules: ['aws-sdk'],
-                minify: true,
-                sourceMap: true,
-            },
-        })
+        // Permissions for ingestion Lambda
+        rawEventBucket.bucket.grantPut(footballEventIngesterLambda.lambdaFunction);
+        eventBus.eventBus.grantPutEventsTo(footballEventIngesterLambda.lambdaFunction);
 
-        const api = new apiGateway.RestApi(this, 'FootballAnalyticsApi', {
-            restApiName: 'Football Analytics Service',
-            description: 'API for football match analytics',
+        // Lambda: Data Processor
+        const footballEventProcessorLambda = new FootballEventProcessor(this, 'FootballEventProcessor', {
+            tableName: matchEventsTable.table.tableName
         });
+        matchEventsTable.table.grantWriteData(footballEventProcessorLambda.lambdaFunction);
+        eventBus.addProcessingLambda(footballEventProcessorLambda);
 
-        const ingestResource = api.root.addResource('ingest');
-        ingestResource.addMethod('POST', new apiGateway.LambdaIntegration(footballEventIngesterLambda));
+        // Create API Gateway
+        const api = new FootballAnalyticsApi(this, 'FootballAnalyticsApi', {
+            dataIngestionLambda: footballEventIngesterLambda.lambdaFunction
+        });
 
         new cdk.CfnOutput(this, 'ApiEndpoint', {
-            value: api.url
+            value: api.api.url
         })
     }
 }

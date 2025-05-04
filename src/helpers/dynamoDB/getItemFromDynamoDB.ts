@@ -3,7 +3,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 const TABLE_NAME = process.env.TABLE_NAME ?? "MatchEvents";
 
-const client = new DynamoDBClient({});
+export const client = new DynamoDBClient({});
 
 export const getItemFromDynamoDB = async (
   condition: string,

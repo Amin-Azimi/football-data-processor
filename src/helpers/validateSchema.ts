@@ -1,6 +1,6 @@
 import { ZodType } from "zod";
 
-export const ValidateSchema = async <TData, T extends ZodType = ZodType>(
+export const validateSchema = async <TData, T extends ZodType = ZodType>(
   zodSchema: T,
   data: string | null,
 ): Promise<

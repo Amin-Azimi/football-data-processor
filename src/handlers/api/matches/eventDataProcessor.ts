@@ -3,7 +3,7 @@ import {
   PublishedMatchEvent,
   PublishedMatchEventSchema,
 } from "../../../models/request.model";
-import { ValidateSchema } from "../../../helpers/validateSchema";
+import { validateSchema } from "../../../helpers/validateSchema";
 import { enrichAndProcessPublishedMatchEvent } from "../../../services/matches/matchEventDataService";
 
 export const handler = async (
@@ -14,7 +14,7 @@ export const handler = async (
   );
 
   const { detail } = event;
-  const maybePublishedMatchEvent = await ValidateSchema<PublishedMatchEvent>(
+  const maybePublishedMatchEvent = await validateSchema<PublishedMatchEvent>(
     PublishedMatchEventSchema,
     JSON.stringify(detail),
   );

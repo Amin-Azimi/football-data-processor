@@ -7,9 +7,9 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
     "cdk": "cdk",
-    "lint": "eslint \"{src,apps,libs,test,cdk}/**/*.ts\" --fix"
+    "lint": "eslint \"{src,apps,libs,test,cdk}/**/*.ts\" --fix",
+    "test": "jest --runInBand"
   },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.799.0",

@@ -1,6 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import { MatchEventType, response } from "../../../models/type";
 import { getMatchEventDataStatistics } from "../../../services/matches/matchEventDataService";
+import {INTERNAL_SERVER_ERROR} from "../../../helpers/constants";
 
 export const handler = async (
   event: APIGatewayEvent,
@@ -34,6 +35,6 @@ export const handler = async (
     return response.success(result);
   } catch (error) {
     console.error("Error processing event:", error);
-    return response.error("Internal server error", 500);
+    return response.error(INTERNAL_SERVER_ERROR, 500);
   }
 };

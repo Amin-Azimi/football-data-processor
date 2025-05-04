@@ -1,0 +1,197 @@
+openapi: 3.0.3
+info:
+  title: Football Match Data API
+  description: A serverless REST API for ingesting and querying football match event data in real-time.
+  version: 1.0.0
+servers:
+  - url: https://{apiGatewayId}.execute-api.{region}.amazonaws.com/prod
+    variables:
+      apiGatewayId:
+        default: your-api-gateway-id
+      region:
+        default: us-east-1
+paths:
+  /ingest:
+    post:
+      summary: Ingest a football match event
+      description: Accepts a match event (e.g., goal, pass) and publishes it for processing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchEvent'
+      responses:
+        '200':
+          description: Event successfully ingested
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eventId:
+                    type: string
+                    example: 7723ca7a-3a56-4115-b04a-bcf10a55ca87
+                  match_id:
+                    type: string
+                    example: "000001"
+                  event_type:
+                    type: string
+                    example: goal
+                  team:
+                    type: string
+                    example: Team A
+                  player:
+                    type: string
+                    example: Player 1
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2023-10-15T14:30:00Z"
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Validation failed
+                details: Invalid event_type
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Internal server error
+  /matches/{match_id}/goals:
+    get:
+      summary: Get total goals for a match
+      description: Returns the total number of goals for the specified match.
+      parameters:
+        - name: match_id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "000001"
+      responses:
+        '200':
+          description: Total goals retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    example: 1
+                  match_Id:
+                    type: string
+                    example: "000001"
+        '400':
+          description: Invalid match id or endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidMatchId:
+                  value:
+                    message: Invalid match id
+                invalidEndpoint:
+                  value:
+                    message: Invalid endpoint
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Internal server error
+  /matches/{match_id}/passes:
+    get:
+      summary: Get total passes for a match
+      description: Returns the total number of passes for the specified match.
+      parameters:
+        - name: match_id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "000001"
+      responses:
+        '200':
+          description: Total passes retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    example: 150
+                  match_Id:
+                    type: string
+                    example: "000001"
+        '400':
+          description: Invalid match id or endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidMatchId:
+                  value:
+                    message: Invalid match id
+                invalidEndpoint:
+                  value:
+                    message: Invalid endpoint
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Internal server error
+components:
+  schemas:
+    MatchEvent:
+      type: object
+      required:
+        - match_id
+        - event_type
+        - team
+        - player
+        - timestamp
+      properties:
+        match_id:
+          type: string
+          example: "000001"
+        event_type:
+          type: string
+          enum: [goal, pass, foul]
+          example: goal
+        team:
+          type: string
+          example: Team A
+        player:
+          type: string
+          example: Player 1
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-10-15T14:30:00Z"
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Validation failed
+        details:
+          type: string
+          example: Invalid event_type
+          nullable: true

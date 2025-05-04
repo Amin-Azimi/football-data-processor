@@ -4,7 +4,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 const TABLE_NAME = process.env.TABLE_NAME ?? "MatchEvents";
 
 const client = new DynamoDBClient({});
-const ddb = DynamoDBDocumentClient.from(client);
+export const ddb = DynamoDBDocumentClient.from(client);
 
 export const saveItemToDynamoDB = async (data: any) => {
   try {

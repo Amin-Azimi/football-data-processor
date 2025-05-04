@@ -31,7 +31,7 @@ export default [
         },
     },
     {
-        files: ['**/*.spec.ts'],
+        files: ['**/*.test.ts'],
         rules: {
             '@typescript-eslint/no-unused-vars': 'off',
         },

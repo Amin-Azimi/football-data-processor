@@ -1,15 +1,16 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ValidateSchema } from "../../../helpers/validateSchema";
+import { validateSchema } from "../../../helpers/validateSchema";
 import { MatchEvent, MatchEventSchema } from "../../../models/request.model";
 import { saveMatchEvent } from "../../../services/matches/matchEventDataService";
 import { response } from "../../../models/type";
+import {INTERNAL_SERVER_ERROR} from "../../../helpers/constants";
 
 export const handler = async (
   event: APIGatewayEvent,
 ): Promise<APIGatewayProxyResult> => {
   console.log(`Match Event data received by ingester`);
   try {
-    const maybeMatchEventData = await ValidateSchema<MatchEvent>(
+    const maybeMatchEventData = await validateSchema<MatchEvent>(
       MatchEventSchema,
       event.body,
     );
@@ -29,6 +30,6 @@ export const handler = async (
     });
   } catch (error) {
     console.error("Error processing event:", error);
-    return response.error("Internal server error", 500);
+    return response.error(INTERNAL_SERVER_ERROR, 500);
   }
 };

@@ -5,22 +5,13 @@ import {
 
 const EVENT_BUS_NAME = process.env.EVENT_BUS_NAME ?? "MatchEventsBus";
 
-const eventBridge = new EventBridgeClient({});
+export const eventBridge = new EventBridgeClient({});
 
 export const publishToEventBridge = async (
   data: object,
   source: string,
   detailType: string,
 ): Promise<void> => {
-  if (!EVENT_BUS_NAME) {
-    console.error(
-      "EventBridge bus name is not defined in environment variables",
-    );
-    throw new Error(
-      "EventBridge bus name is not defined in environment variables",
-    );
-  }
-
   const params = {
     Entries: [
       {

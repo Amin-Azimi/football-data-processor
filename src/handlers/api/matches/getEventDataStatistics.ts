@@ -1,7 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import { MatchEventType, response } from "../../../models/type";
 import { getMatchEventDataStatistics } from "../../../services/matches/matchEventDataService";
-import {INTERNAL_SERVER_ERROR} from "../../../helpers/constants";
+import { INTERNAL_SERVER_ERROR } from "../../../helpers/constants";
 
 export const handler = async (
   event: APIGatewayEvent,

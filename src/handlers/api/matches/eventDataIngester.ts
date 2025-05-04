@@ -3,7 +3,7 @@ import { validateSchema } from "../../../helpers/validateSchema";
 import { MatchEvent, MatchEventSchema } from "../../../models/request.model";
 import { saveMatchEvent } from "../../../services/matches/matchEventDataService";
 import { response } from "../../../models/type";
-import {INTERNAL_SERVER_ERROR} from "../../../helpers/constants";
+import { INTERNAL_SERVER_ERROR } from "../../../helpers/constants";
 
 export const handler = async (
   event: APIGatewayEvent,

@@ -24,8 +24,9 @@ This is a serverless application built with AWS CDK (TypeScript) and TypeScript 
 
 3. Bootstrap the CDK environment (if not already done):
    ```bash
-   cdk bootstrap aws://<account-id>/<region>
+   cdk bootstrap
    ```
+   **Note**: Ensure AWS CLI is configured with valid credentials (`aws configure`). If deploying to a specific AWS account or region, use `cdk bootstrap aws://<account-id>/<region>` (e.g., `cdk bootstrap aws://123456789012/us-east-1`).
 
 4. Deploy the stack:
    ```bash
